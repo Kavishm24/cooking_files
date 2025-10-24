@@ -1,0 +1,2 @@
+yt-dlp -f "bestvideo[height<=1080][vcodec!=av01]+bestaudio[acodec!=opus]" --merge-output-format mp4 "https://www.youtube.com/watch?v=7IgVGSaQPaw"
+yt-dlp -f "bestvideo[height<=1080]+bestaudio" --merge-output-format mkv "https://www.youtube.com/watch?v=7IgVGSaQPaw"
