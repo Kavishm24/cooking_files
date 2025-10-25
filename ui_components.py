@@ -31,11 +31,11 @@ class UIComponents:
             )
     
     @staticmethod
-    def url_input_component() -> List[str]:
-        """URL input component with single/multiple options"""
+    def url_input_component() -> tuple:
+        """URL input component with playlist detection"""
         input_method = st.radio(
             "Input method:",
-            ["Single URL", "Multiple URLs"],
+            ["Single URL", "Multiple URLs", "Playlist URL"],
             horizontal=True
         )
         
@@ -44,14 +44,28 @@ class UIComponents:
                 "YouTube URL:",
                 placeholder="https://www.youtube.com/watch?v=..."
             )
-            return [url] if url else []
+            return ([url] if url else [], False)
+        
+        elif input_method == "Playlist URL":
+            url = st.text_input(
+                "YouTube Playlist URL:",
+                placeholder="https://www.youtube.com/playlist?list=..."
+            )
+            if url and ('playlist' in url or 'list=' in url):
+                return ([url], True)
+            elif url:
+                st.warning("⚠️ This doesn't look like a playlist URL")
+                return ([], False)
+            return ([], False)
+        
         else:
             urls_text = st.text_area(
                 "YouTube URLs (one per line):",
                 height=100,
                 placeholder="https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=..."
             )
-            return [url.strip() for url in urls_text.split('\n') if url.strip()]
+            urls = [url.strip() for url in urls_text.split('\n') if url.strip()]
+            return (urls, False)
     
     @staticmethod
     def progress_display(current: int, total: int, message: str = ""):
