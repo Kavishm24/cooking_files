@@ -7,6 +7,9 @@ import subprocess
 import os
 import shutil
 from datetime import datetime
+import zipfile
+import tempfile
+from urllib.parse import urlparse, parse_qs
 
 
 class YouTubeMP3Downloader:
@@ -404,6 +407,118 @@ class YouTubeMP3Downloader:
         
         return results
 
+    def is_playlist_url(self, url):
+        """Check if URL is a playlist"""
+        return 'playlist' in url or 'list=' in url
+
+    def get_playlist_info(self, url):
+        """Get playlist information"""
+        try:
+            command = [
+                'yt-dlp',
+                '--dump-json',
+                '--flat-playlist',
+                url
+            ]
+            
+            result = subprocess.run(command, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode == 0:
+                import json
+                lines = result.stdout.strip().split('\n')
+                videos = []
+                
+                for line in lines:
+                    if line:
+                        video_info = json.loads(line)
+                        videos.append({
+                            'title': video_info.get('title', 'Unknown'),
+                            'id': video_info.get('id', ''),
+                            'url': f"https://www.youtube.com/watch?v={video_info.get('id', '')}"
+                        })
+                
+                return {
+                    'status': 'success',
+                    'videos': videos,
+                    'count': len(videos)
+                }
+            else:
+                return {'status': 'failed', 'error': result.stderr}
+            
+        except Exception as e:
+            return {'status': 'failed', 'error': str(e)}
+
+    def download_playlist(self, url, download_type="mp3", quality="best", format_pref="mp4"):
+        """Download entire playlist and create zip file"""
+        try:
+            # Get playlist info
+            playlist_info = self.get_playlist_info(url)
+            if playlist_info['status'] == 'failed':
+                return {'status': 'failed', 'error': playlist_info['error']}
+            
+            videos = playlist_info['videos']
+            if not videos:
+                return {'status': 'failed', 'error': 'No videos found in playlist'}
+            
+            # Create temporary directory for this playlist
+            temp_dir = tempfile.mkdtemp(prefix="playlist_")
+            
+            # Download all videos
+            results = []
+            successful_files = []
+            
+            for i, video in enumerate(videos):
+                print(f"[{i+1}/{len(videos)}] Downloading: {video['title']}")
+                
+                if download_type == "mp3":
+                    # Temporarily change download dir
+                    original_dir = self.download_dir
+                    self.download_dir = temp_dir
+                    result = self.download_mp3(video['url'], quality)
+                    self.download_dir = original_dir
+                else:
+                    original_dir = self.download_dir
+                    self.download_dir = temp_dir
+                    result = self.download_video(video['url'], format_pref, quality)
+                    self.download_dir = original_dir
+                
+                results.append(result)
+                if result['status'] == 'success':
+                    successful_files.append(result['file_path'])
+            
+            # Create zip file if we have successful downloads
+            if successful_files:
+                zip_filename = f"playlist_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+                zip_path = os.path.join(self.download_dir, zip_filename)
+                
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for file_path in successful_files:
+                        if os.path.exists(file_path):
+                            zipf.write(file_path, os.path.basename(file_path))
+                
+                # Clean up temporary files
+                shutil.rmtree(temp_dir)
+                
+                zip_size = os.path.getsize(zip_path)
+                
+                return {
+                    'status': 'success',
+                    'file_path': zip_path,
+                    'file_name': zip_filename,
+                    'file_size': zip_size,
+                    'total_videos': len(videos),
+                    'successful_downloads': len(successful_files),
+                    'failed_downloads': len(videos) - len(successful_files),
+                    'error': None
+                }
+            else:
+                # Clean up temp dir
+                shutil.rmtree(temp_dir)
+                return {'status': 'failed', 'error': 'No videos downloaded successfully'}
+            
+        except Exception as e:
+            return {'status': 'failed', 'error': str(e)}
+
 
 # Example usage
 if __name__ == "__main__":
@@ -451,7 +566,7 @@ if __name__ == "__main__":
     """
 
     # Example 3: Download a video in best quality
-    print("\n" + "="*60)
+    """print("\n" + "="*60)
     print("Example 3: Download Video in Best Quality")
     print("="*60)
     
@@ -463,7 +578,7 @@ if __name__ == "__main__":
     if video_result['status'] == 'success':
         print(f"\n✅ Success! Video saved at: {video_result['file_path']}")
     else:
-        print(f"\n❌ Failed: {video_result['error']}")
+        print(f"\n❌ Failed: {video_result['error']}")"""
     
     # Example 4: Download multiple videos
     # Uncomment to test batch video download
