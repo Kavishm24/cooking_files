@@ -66,18 +66,19 @@ class YouTubeMP3Downloader:
             else:
                 output_template = os.path.join(self.download_dir, "%(title)s.%(ext)s")
             
-            # Build yt-dlp command
+            # Build yt-dlp command with better YouTube handling
             command = [
                 'yt-dlp',
                 '-x',                           # Extract audio
                 '--audio-format', 'mp3',        # Convert to MP3
                 '--audio-quality', audio_quality,
                 '--embed-thumbnail',            # Embed thumbnail as cover art
-                '--add-metadata',               # Add metadata (title, artist, etc.)
+                '--add-metadata',               # Add metadata
                 '--no-playlist',                # Download single video only
-                '--extractor-args', 'youtube:player_client=default',  # Fix JS runtime warning
-                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                '--cookies-from-browser', 'chrome',  # Use browser cookies if available
+                '--extractor-args', 'youtube:player_client=android',  # Use Android client only
+                '--user-agent', 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
+                '--retry-sleep', '5',           # Wait 5 seconds between retries
+                '--retries', '3',               # Retry 3 times
                 '-o', output_template,          # Output template
                 url
             ]
@@ -156,8 +157,9 @@ class YouTubeMP3Downloader:
                 'yt-dlp',
                 '--dump-json',
                 '--no-playlist',
-                '--extractor-args', 'youtube:player_client=default',
-                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                '--extractor-args', 'youtube:player_client=android,web',
+                '--user-agent', 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36',
+                '--cookies-from-browser', 'chrome',
                 url
             ]
             
@@ -273,7 +275,7 @@ class YouTubeMP3Downloader:
                     height = quality.replace('p', '') if quality != "best" else "9999"
                     format_selector = f"bv*[height<={height}]+ba/b[height<={height}]"
             
-            # Build yt-dlp command
+            # Build yt-dlp command with better YouTube handling
             command = [
                 'yt-dlp',
                 '-f', format_selector,          # Format selection
@@ -284,8 +286,11 @@ class YouTubeMP3Downloader:
                 '--add-metadata',               # Add metadata
                 '--no-playlist',                # Download single video only
                 '--ignore-errors',              # Continue on download errors
-                '--extractor-args', 'youtube:player_client=default',  # Fix JS runtime warning
-                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                '--extractor-args', 'youtube:player_client=android,web',  # Use multiple clients
+                '--user-agent', 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36',
+                '--cookies-from-browser', 'chrome',  # Use browser cookies if available
+                '--retry-sleep', '5',           # Wait 5 seconds between retries
+                '--retries', '3',               # Retry 3 times
                 '-o', output_template,          # Output template
                 url
             ]
