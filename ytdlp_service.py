@@ -75,6 +75,9 @@ class YouTubeMP3Downloader:
                 '--embed-thumbnail',            # Embed thumbnail as cover art
                 '--add-metadata',               # Add metadata (title, artist, etc.)
                 '--no-playlist',                # Download single video only
+                '--extractor-args', 'youtube:player_client=default',  # Fix JS runtime warning
+                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                '--cookies-from-browser', 'chrome',  # Use browser cookies if available
                 '-o', output_template,          # Output template
                 url
             ]
@@ -153,6 +156,8 @@ class YouTubeMP3Downloader:
                 'yt-dlp',
                 '--dump-json',
                 '--no-playlist',
+                '--extractor-args', 'youtube:player_client=default',
+                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 url
             ]
             
@@ -279,6 +284,8 @@ class YouTubeMP3Downloader:
                 '--add-metadata',               # Add metadata
                 '--no-playlist',                # Download single video only
                 '--ignore-errors',              # Continue on download errors
+                '--extractor-args', 'youtube:player_client=default',  # Fix JS runtime warning
+                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 '-o', output_template,          # Output template
                 url
             ]
@@ -418,6 +425,8 @@ class YouTubeMP3Downloader:
                 'yt-dlp',
                 '--dump-json',
                 '--flat-playlist',
+                '--extractor-args', 'youtube:player_client=default',
+                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 url
             ]
             
