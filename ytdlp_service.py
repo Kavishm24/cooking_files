@@ -40,17 +40,7 @@ class YouTubeMP3Downloader:
         os.makedirs(self.download_dir, exist_ok=True)
     
     def download_mp3(self, url, quality="best", output_filename=None):
-        """
-        Download a YouTube video as MP3.
-        
-        Args:
-            url (str): YouTube video URL
-            quality (str): Audio quality - "best" (0), "good" (5), or "worst" (9)
-            output_filename (str): Optional custom filename (without extension)
-        
-        Returns:
-            dict: Result with status, file_path, and error (if any)
-        """
+        """Download a YouTube video as MP3."""
         try:
             # Map quality to yt-dlp audio quality values
             quality_map = {
@@ -157,9 +147,8 @@ class YouTubeMP3Downloader:
                 'yt-dlp',
                 '--dump-json',
                 '--no-playlist',
-                '--extractor-args', 'youtube:player_client=android,web',
-                '--user-agent', 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36',
-                '--cookies-from-browser', 'chrome',
+                '--extractor-args', 'youtube:player_client=android',
+                '--user-agent', 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
                 url
             ]
             
@@ -286,9 +275,8 @@ class YouTubeMP3Downloader:
                 '--add-metadata',               # Add metadata
                 '--no-playlist',                # Download single video only
                 '--ignore-errors',              # Continue on download errors
-                '--extractor-args', 'youtube:player_client=android,web',  # Use multiple clients
-                '--user-agent', 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36',
-                '--cookies-from-browser', 'chrome',  # Use browser cookies if available
+                '--extractor-args', 'youtube:player_client=android',  # Use Android client
+                '--user-agent', 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
                 '--retry-sleep', '5',           # Wait 5 seconds between retries
                 '--retries', '3',               # Retry 3 times
                 '-o', output_template,          # Output template
@@ -430,8 +418,8 @@ class YouTubeMP3Downloader:
                 'yt-dlp',
                 '--dump-json',
                 '--flat-playlist',
-                '--extractor-args', 'youtube:player_client=default',
-                '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                '--extractor-args', 'youtube:player_client=android',
+                '--user-agent', 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip',
                 url
             ]
             
